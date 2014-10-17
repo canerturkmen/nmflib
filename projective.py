@@ -50,12 +50,12 @@ class ProjectiveNMF(BaseNMF):
             
             # every 10 iterations, check convergence
             if i % 10 == 0:
-                dist = frobenius(V, Wsq*V)
+                dist = frobenius(V, W*W.T*V)
                 convgraph[i/10] = dist
 
-                if distold - dist < self.stopconv:
-                    print "converged"
-                    break
+#                if distold - dist < self.stopconv:
+#                    print "converged"
+#                    break
                 distold = dist
                 
         return NMFResult((W,), convgraph, dist)
