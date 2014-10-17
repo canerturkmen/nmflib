@@ -42,7 +42,7 @@ class ProjectiveNMF(BaseNMF):
             
             # multiplicative update step, Euclidean error reducing   
             num = VV * W
-            denom = W * (W.T * VV * W) + VV * W * (W.T * W)
+            denom = (W * (W.T * VV * W)) + (VV * W * (W.T * W))
             W = np.multiply(W, np.divide(num, denom))
 
             # normalize W
