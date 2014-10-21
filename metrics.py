@@ -13,8 +13,8 @@ def frobenius(A, B):
     """
     Function for calculating the Euclidean distance / Frobenius norm between two matrices
     """
-    return np.sum((A-B)**2)**.5
-
+    return np.linalg.norm(A-B, 2)
+    
 def kldivergence(A,B):
     """
     Function for determining the divergence of A from B
@@ -30,4 +30,6 @@ def kldivergence(A,B):
     :rtype: float
     """
     return np.sum((A*np.log(A/B) - A + B))
+
+
 

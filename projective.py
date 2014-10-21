@@ -46,16 +46,13 @@ class ProjectiveNMF(BaseNMF):
             W = np.multiply(W, np.divide(num, denom))
 
             # normalize W
-            W /= np.linalg.norm(W)
+            W /= np.linalg.norm(W,2)
             
             # every 10 iterations, check convergence
             if i % 10 == 0:
                 dist = frobenius(V, W*W.T*V)
                 convgraph[i/10] = dist
 
-#                if distold - dist < self.stopconv:
-#                    print "converged"
-#                    break
                 distold = dist
                 
         return NMFResult((W,), convgraph, dist)
