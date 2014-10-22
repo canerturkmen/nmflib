@@ -3,9 +3,15 @@ Welcome to
 ## NMFLIB
 
 NMFLIB is the early version of a lightweight library including different implementations of Non-negative
-Matrix Factorization, built using **python** and numpy.
+Matrix Factorization, and variants, built using **python**, numpy, scipy and some components from scikit learn.
 
-For the demo, in `demo.py`, we use the Wine data set from the UCI Repository, and the USPS handwritten digits data set
-as well as Lenna included in SciPy.
+The main application intended for this library is clustering.
+
+Currently, the library includes initial implementations of:
+- Classical NMF (Lee and Seung)
+- Projective NMF (Yuan and Oja)
+- Nonnegative Spectral Clustering (Ding et al.)
+
+The code also includes some demos, contained in files `demo_*`, using the USPS handwritten digits, UCI repository Wine data set, and Lenna from scipy. 
 
 For any questions you can always [email](mailto:turkmen.ac@gmail.com) me.
