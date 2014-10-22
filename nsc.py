@@ -40,20 +40,20 @@ class NSpecClus(BaseNMF):
             self._affinity = "nn"
 
         # the gamma parameter for Gaussian kernel, default 1.
-        self._gamma = kwargs.get("gamma") or 1.
+        self._gamma = kwargs.get("gamma") or .005
 
 
     def predict(self):
 
         if self._affinity == "gaussian":
             # first convert the data matrix to pairwise distances
-            self.dist = squareform(pdist(self.X))
+            dist_matrix = squareform(pdist(self.X))
             # then compute the affinity matrix using Gaussian kernel of the Euclidean distance
-            self.V = np.exp(-self._gamma * self.dist ** 2)
+            self.V = np.exp(-self._gamma * dist_matrix ** 2)
 
         else:
             # calculate the K-NN graph of the matrix
-            self.V = kneighbors_graph(self.X)
+            self.V = kneighbors_graph(self.X, n_neighbors=20)
 
         self.V = np.matrix(self.V)
         m, n = self.V.shape
@@ -75,6 +75,7 @@ class NSpecClus(BaseNMF):
             # every 10 iterations, check convergence
             if i % 10 == 0:
                 dist = alpha.trace()
+                print dist
                 convgraph[i/10] = dist
 
                 diff = dist - distold

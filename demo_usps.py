@@ -28,7 +28,7 @@ labels, data = usps()
 data = data + np.ones(np.shape(data))
 
 #%%
-pnmf = NSpecClus(data, 10, maxiter=500, affinity="gaussian")
+pnmf = NSpecClus(data, 10, maxiter=300, affinity="gaussian")
 
 result = pnmf.predict()
 
