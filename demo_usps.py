@@ -5,6 +5,7 @@ Projective NMF demo with the usps data set (handwritten digits)
 from nmf import NMF
 from projective import ProjectiveNMF
 from scipy import misc
+from nsc import NSpecClus
 import pylab as pl
 import numpy as np
 from sklearn.metrics import normalized_mutual_info_score
@@ -27,7 +28,7 @@ labels, data = usps()
 data = data + np.ones(np.shape(data))
 
 #%%
-pnmf = ProjectiveNMF(data, 10, maxiter=500)
+pnmf = NSpecClus(data, 10, maxiter=500, affinity="gaussian")
 
 result = pnmf.predict()
 
@@ -40,6 +41,6 @@ w = result.matrices[0]
 
 assigned_labels = np.array(np.argmax(w, axis=1))[:,0]
 
-#%% Calculate NMI
+#%%
 
 normalized_mutual_info_score(assigned_labels, labels)
