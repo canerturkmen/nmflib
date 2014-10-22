@@ -55,7 +55,12 @@ class NSpecClus(BaseNMF):
             # calculate the K-NN graph of the matrix
             self.V = kneighbors_graph(self.X, n_neighbors=20)
 
-        self.V = np.matrix(self.V)
+        if self._affinity == "nn":
+            # TODO: must implement sparse version as well
+            self.V = self.V.todense()
+        else:
+            self.V = np.matrix(self.V)
+        
         m, n = self.V.shape
         dd = np.array(self.V.sum(1))[:,0]
         D = np.matrix(np.diag(dd))
@@ -74,6 +79,7 @@ class NSpecClus(BaseNMF):
 
             # every 10 iterations, check convergence
             if i % 10 == 0:
+                
                 dist = alpha.trace()
                 print dist
                 convgraph[i/10] = dist
