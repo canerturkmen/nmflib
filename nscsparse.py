@@ -41,7 +41,7 @@ class NSpecSparse(BaseNMF):
         m, n = self.V.shape
 
         dd = np.array(self.V.sum(1))[:,0]
-        D = diags(dd, format="csr")
+        D = diags(dd,0, format="csr")
         H = csr_matrix(np.matrix(np.random.rand(m, self.k)))
 
         convgraph = np.zeros(self.maxiter / 10)
