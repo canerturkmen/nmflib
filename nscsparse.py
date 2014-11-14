@@ -50,10 +50,11 @@ class NSpecSparse(BaseNMF):
         for i in range(self.maxiter):
 
             # multiplicative update step, Euclidean error reducing
-            alpha = H.T * self.V * H
-
-            d1 = np.sqrt(np.divide(self.V*H, D*H*alpha))
-            H = np.multiply(H, d1)
+            
+            VH = self.V*H # 486
+            alpha = H.T * VH # 272
+            d1 = csr_matrix(np.sqrt(np.divide(VH,D*H*alpha))) #670ms profile
+            H = H.multiply(d1) #20ms
 
             # every 10 iterations, check convergence
             if i % 10 == 0:
