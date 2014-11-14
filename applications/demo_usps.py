@@ -6,6 +6,7 @@ from nmf import NMF
 from projective import ProjectiveNMF
 from scipy import misc
 from nsc import NSpecClus
+from nscsparse import NSpecSparse
 import pylab as pl
 import numpy as np
 from sklearn.metrics import normalized_mutual_info_score
@@ -28,15 +29,15 @@ labels, data = usps()
 data = data + np.ones(np.shape(data))
 
 #%%
-pnmf = NSpecClus(data, 10, maxiter=300, affinity="nn")
+pnmf = NSpecSparse(data, 10, maxiter=300, affinity="nn")
 
 result = pnmf.predict()
-
-pl.plot(result.convgraph)
+#%%
+pl.plot(result.convgraph[2:])
 
 #%%
 
-w = result.matrices[0]
+w = result.matrices[0].todense()
 #pl.imshow(w)
 
 assigned_labels = np.array(np.argmax(w, axis=1))[:,0]

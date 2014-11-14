@@ -52,7 +52,7 @@ class NSpecSparse(BaseNMF):
         for i in range(self.maxiter):
 
             # multiplicative update step, Euclidean error reducing
-            
+            print self.V.shape, H.shape
             VH = self.V*H # 486
             alpha = H.T * VH # 272
             d1 = csr_matrix(np.sqrt(np.divide(VH,(D*H*alpha) + EPS))) #519ms profile
@@ -64,7 +64,8 @@ class NSpecSparse(BaseNMF):
                 dist = alpha.todense().trace()
                 print dist
                 convgraph[i/10] = dist
-
+                if dist[0,0] is None:
+                    raise Exception("There s a problem with your algorithm !!")
                 diff = dist - distold
                 print "diff is %s" % diff
 
