@@ -59,7 +59,7 @@ class NSpecSparse(BaseNMF):
             # every 10 iterations, check convergence
             if i % 10 == 0:
 
-                dist = alpha.trace()
+                dist = alpha.todense().trace()
                 print dist
                 convgraph[i/10] = dist
 
