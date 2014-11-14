@@ -36,6 +36,8 @@ class NSpecSparse(BaseNMF):
 
     def predict(self):
 
+        eps = np.finfo(float).eps # get epsilon
+
         self.V = kneighbors_graph(self.X, n_neighbors=20)
 
         m, n = self.V.shape
@@ -53,7 +55,7 @@ class NSpecSparse(BaseNMF):
             
             VH = self.V*H # 486
             alpha = H.T * VH # 272
-            d1 = csr_matrix(np.sqrt(np.divide(VH,D*H*alpha))) #670ms profile
+            d1 = csr_matrix(np.sqrt(np.divide(VH,D*H*alpha + eps))) #670ms profile
             H = H.multiply(d1) #20ms
 
             # every 10 iterations, check convergence
