@@ -7,7 +7,7 @@ from basenmf import BaseNMF, NMFResult
 from scipy.spatial.distance import pdist, squareform
 import numpy as np
 from sklearn.neighbors import kneighbors_graph
-from scipy.sparse import csr_matrix, diags
+from scipy.sparse import csr_matrix, diags, issparse
 #%%
 class NSpecSparse(BaseNMF):
     """
@@ -33,7 +33,13 @@ class NSpecSparse(BaseNMF):
         # the gamma parameter for Gaussian kernel, default .005
         self._gamma = kwargs.get("gamma") or .005
 
-
+    def _check_nans(self, X, name):
+        if issparse(X):
+            X = X.todense()
+        if np.any(np.isnan(X)):
+            raise Exception("First NaN encountered at %s" % name)
+        
+        
     def predict(self):
 
         self.V = kneighbors_graph(self.X, n_neighbors=20)
@@ -54,9 +60,19 @@ class NSpecSparse(BaseNMF):
             # multiplicative update step, Euclidean error reducing
             # print self.V.shape, H.shape
             VH = self.V*H # 486
+#            self._check_nans(VH, 'VH')
+            
             alpha = H.T * VH # 272
-            d1 = csr_matrix(np.sqrt(np.divide(VH,(D*H*alpha) + EPS))) #519ms profile
+#            self._check_nans(alpha, 'alpha')
+      
+            d1 = csr_matrix(np.sqrt(np.divide(VH + EPS, D*H*alpha + EPS)))
+            # d1 = csr_matrix(np.sqrt(np.divide(VH,(D*H*alpha) + EPS))) #519ms profile
             H = H.multiply(d1) #20ms
+
+#            self._check_nans(H, 'Hupdate')            
+
+#            if np.any(np.isnan(H.todense())):
+#                raise Exception("There s a problem with your algorithm !! NaNs filling")
 
             # every 10 iterations, check convergence
             if i % 10 == 0:
@@ -64,8 +80,7 @@ class NSpecSparse(BaseNMF):
                 dist = alpha.todense().trace()
                 print dist
                 convgraph[i/10] = dist
-                if np.isnan(dist[0,0]):
-                    raise Exception("There s a problem with your algorithm !!")
+                
                 diff = dist - distold
                 print "diff is %s" % diff
 

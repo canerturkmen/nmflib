@@ -31,7 +31,7 @@ data = data + np.ones(np.shape(data))
 #%%
 pnmf = NSpecSparse(data, 10, maxiter=300, affinity="nn")
 
-result = pnmf.predict()
+%timeit pnmf.predict()
 #%%
 pl.plot(result.convgraph[2:])
 
