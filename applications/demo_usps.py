@@ -22,26 +22,10 @@ def usps(path="/Users/Caner/code/nmflib/data/usps/"):
 def show_digit(arr):
     arr_n = np.reshape(arr, (16,16))
     pl.imshow(arr_n, cmap="gray")
-#%%
+
 
 labels, data = usps()
 
 data = data + np.ones(np.shape(data))
 
 #%%
-pnmf = NSpecSparse(data, 10, maxiter=300, affinity="nn")
-
-%timeit pnmf.predict()
-#%%
-pl.plot(result.convgraph[2:])
-
-#%%
-
-w = result.matrices[0].todense()
-#pl.imshow(w)
-
-assigned_labels = np.array(np.argmax(w, axis=1))[:,0]
-
-#%%
-
-normalized_mutual_info_score(assigned_labels, labels)

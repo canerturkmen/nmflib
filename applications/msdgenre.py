@@ -18,6 +18,7 @@ import numpy as np
 import pandas as pd
 from sklearn.metrics import normalized_mutual_info_score
 from sklearn.preprocessing import LabelEncoder, scale, normalize, MinMaxScaler
+from sklearn.cluster import KMeans
 
 MSD_FILE_PATH = "/Users/Caner/code/nmflib/data/msd_genre/"
 
@@ -39,12 +40,14 @@ def msd():
 X, y = msd()
 #MinMaxScaler().fit_transform(X)
 
-np.save("/Users/Caner/code/nmflib/data/msd_genre/Xarr", X)
-np.save("/Users/Caner/code/nmflib/data/msd_genre/yarr", y)
+#np.save("/Users/Caner/code/nmflib/data/msd_genre/Xarr", X)
+#np.save("/Users/Caner/code/nmflib/data/msd_genre/yarr", y)
 
 #%% 
 
-nsc = ProjectiveNMF(X, 10)
+XX = MinMaxScaler().fit_transform(X)
 
-nsc.predict()
+nsc = NMF(XX, 10)
+
+res = nsc.predict()
 

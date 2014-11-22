@@ -57,32 +57,21 @@ class NSpecSparse(BaseNMF):
 
         for i in range(self.maxiter):
 
-            # multiplicative update step, Euclidean error reducing
-            # print self.V.shape, H.shape
             VH = self.V*H # 486
-#            self._check_nans(VH, 'VH')
             
             alpha = H.T * VH # 272
-#            self._check_nans(alpha, 'alpha')
       
             d1 = csr_matrix(np.sqrt(np.divide(VH + EPS, D*H*alpha + EPS)))
-            # d1 = csr_matrix(np.sqrt(np.divide(VH,(D*H*alpha) + EPS))) #519ms profile
             H = H.multiply(d1) #20ms
 
-#            self._check_nans(H, 'Hupdate')            
-
-#            if np.any(np.isnan(H.todense())):
-#                raise Exception("There s a problem with your algorithm !! NaNs filling")
-
-            # every 10 iterations, check convergence
             if i % 10 == 0:
 
                 dist = alpha.todense().trace()
-                print dist
+                #print dist
                 convgraph[i/10] = dist
                 
                 diff = dist - distold
-                print "diff is %s" % diff
+                #print "diff is %s" % diff
 
                 distold = dist
 
