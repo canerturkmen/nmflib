@@ -17,7 +17,7 @@ import pylab as pl
 import numpy as np
 import pandas as pd
 from sklearn.metrics import normalized_mutual_info_score
-from sklearn.preprocessing import LabelEncoder, scale, normalize, MinMaxScaler
+from sklearn.preprocessing import LabelEncoder, scale, normalize, MinMaxScaler, LabelBinarizer
 from sklearn.cluster import KMeans
 
 MSD_FILE_PATH = "/Users/Caner/code/nmflib/data/msd_genre/"
@@ -29,25 +29,25 @@ def msd():
     A1 = pd.read_csv(MSD_FILE_PATH + "msd1.txt")
     A2 = pd.read_csv(MSD_FILE_PATH + "msd2.txt")
     A = pd.concat((A1, A2))
-    data = A.ix[:, [5,7,8] + range(10,34)]
     
+    data = A.ix[:, [4,5] + range(8,34)]
+    
+    # generate the target variable
     le = LabelEncoder()
     labels = le.fit_transform(A.ix[:,0])
-    return np.matrix(data), labels 
     
-    # return np.vstack((A1, A2))
+    # generate the time_signature and key categorical inputs w LabelBinarizer
+    lb = LabelBinarizer()
+    ts_data = lb.fit_transform(A.ix[:,6])
+    key_data = lb.fit_transform(A.ix[:,7])
+    
+    ret_data = np.hstack((np.matrix(data), np.matrix(ts_data), np.matrix(key_data)))    
+   
+    return ret_data, labels 
+
 
 X, y = msd()
-#MinMaxScaler().fit_transform(X)
 
-#np.save("/Users/Caner/code/nmflib/data/msd_genre/Xarr", X)
-#np.save("/Users/Caner/code/nmflib/data/msd_genre/yarr", y)
-
-#%% 
-
-XX = MinMaxScaler().fit_transform(X)
-
-nsc = NMF(XX, 10)
-
-res = nsc.predict()
-
+#%%
+np.save("/Users/Caner/code/nmflib/data/msd_genre/Xarr", X)
+np.save("/Users/Caner/code/nmflib/data/msd_genre/yarr", y)
