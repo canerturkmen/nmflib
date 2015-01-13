@@ -30,10 +30,17 @@ data = data + np.ones(np.shape(data))
 
 #%%
 
-from experiment import Experiment
+#from experiment import Experiment
+
 
 exp = Experiment(data, labels, 10)
 
 exp_res = exp.run()
 
 print(exp_res)
+
+#%%
+
+nsckm = NSpecSparseKM(data, 10, maxiter=2000)
+
+res = nsckm.predict()

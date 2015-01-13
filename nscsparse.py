@@ -7,6 +7,7 @@ from basenmf import BaseNMF, NMFResult
 from scipy.spatial.distance import pdist, squareform
 import numpy as np
 from sklearn.neighbors import kneighbors_graph
+
 from scipy.sparse import csr_matrix, diags, issparse
 #%%
 class NSpecSparse(BaseNMF):
@@ -28,10 +29,10 @@ class NSpecSparse(BaseNMF):
         :param k: number of clusters
         :return:
         """
-
         BaseNMF.__init__(self, X, k, **kwargs)
         # the gamma parameter for Gaussian kernel, default .005
         self._gamma = kwargs.get("gamma") or .005
+
 
     def _check_nans(self, X, name):
         if issparse(X):

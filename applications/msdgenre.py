@@ -41,6 +41,7 @@ def msd():
     ts_data = lb.fit_transform(A.ix[:,6])
     key_data = lb.fit_transform(A.ix[:,7])
     
+    print le.classes_
     ret_data = np.hstack((np.matrix(data), np.matrix(ts_data), np.matrix(key_data)))    
    
     return ret_data, labels 

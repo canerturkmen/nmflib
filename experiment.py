@@ -8,8 +8,9 @@ A module for running experiments with several clustering alternatives and report
 
 The techniques used are KMeans from sklearn, classical NMF, and Sparse NN NSC
 """
-
+#%%
 from nscsparse import NSpecSparse
+from nspeckm import NSpecSparseKM
 from nmf import NMF
 from sklearn.cluster import KMeans
 import numpy as np
@@ -41,20 +42,27 @@ class Experiment:
         nsc = NSpecSparse(self.X, self.k, maxiter=2000)
         nmf = NMF(self.X, self.k)
         km = KMeans(n_clusters=self.k)
+        nsckm = NSpecSparseKM(self.X, self.k, maxiter=2000)
         
         nsc_result = nsc.predict()
         nmf_result = nmf.predict()
         km_result  = km.fit_predict(self.X)
+        nsckm_result = nsckm.predict()
         
         w_nsc = nsc_result.matrices[0].todense()      
         w_nmf = nmf_result.matrices[0]
+        w_nsckm = nsckm_result.matrices # gets only the labels
         
         arrays = {
             'nsc': np.array(np.argmax(w_nsc, axis=1))[:,0],
             'nmf': np.array(np.argmax(w_nmf, axis=1)),
-            'km': km_result
+            'km': km_result,
+            'nsckm': w_nsckm
         }
         
         nmi = {k: nmiscore(arrays[k], self.y) for k in arrays.keys()}
             
         return (nmi, arrays)
+        
+        
+        
