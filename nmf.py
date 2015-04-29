@@ -2,7 +2,7 @@ from basenmf import BaseNMF, NMFResult
 from metrics import frobenius, kldivergence
 import sys
 import numpy as np
-
+#%%
 class NMF(BaseNMF):
     """
     Implementation of basic NMF (Lee and Seung) algorithm with Euclidean and KL-divergence objective functions
@@ -50,9 +50,9 @@ class NMF(BaseNMF):
 
                 convgraph[i/10] = dist
                 # print dist
-                if distold - dist < self.stopconv:
-                    print "Converged"
-                    break
-                distold = dist
+                #if distold - dist < self.stopconv:
+                #    print "Converged"
+                #    break
+                #distold = dist
 
         return NMFResult((W, H), convgraph, dist)
