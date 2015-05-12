@@ -79,7 +79,7 @@ class NSpecClus(BaseNMF):
 
             # every 10 iterations, check convergence
             if i % 10 == 0:
-                
+
                 dist = alpha.trace()
                 print dist
                 convgraph[i/10] = dist
