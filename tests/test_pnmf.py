@@ -1,5 +1,5 @@
 
-from projective import ProjectiveNMF
+from ..projective import ProjectiveNMF
 import numpy as np
 
 def test_try():
