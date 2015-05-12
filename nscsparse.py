@@ -39,8 +39,8 @@ class NSpecSparse(BaseNMF):
             X = X.todense()
         if np.any(np.isnan(X)):
             raise Exception("First NaN encountered at %s" % name)
-        
-        
+
+
     def predict(self):
 
         self.V = kneighbors_graph(self.X, n_neighbors=20)
@@ -52,16 +52,16 @@ class NSpecSparse(BaseNMF):
         H = csr_matrix(np.matrix(np.random.rand(m, self.k)))
 
         EPS = csr_matrix(np.ones(H.shape)*np.finfo(float).eps) # matrix of epsilons
-        
+
         convgraph = np.zeros(self.maxiter / 10)
         distold = 0.
 
         for i in range(self.maxiter):
 
             VH = self.V*H # 486
-            
+
             alpha = H.T * VH # 272
-      
+
             d1 = csr_matrix(np.sqrt(np.divide(VH + EPS, D*H*alpha + EPS)))
             H = H.multiply(d1) #20ms
 
@@ -70,7 +70,7 @@ class NSpecSparse(BaseNMF):
                 dist = alpha.todense().trace()
                 #print dist
                 convgraph[i/10] = dist
-                
+
                 diff = dist - distold
                 #print "diff is %s" % diff
 
