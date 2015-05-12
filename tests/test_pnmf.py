@@ -2,9 +2,6 @@
 from ..projective import ProjectiveNMF
 import numpy as np
 
-def test_try():
-    assert 1 == 1
-
 
 class TestPNMF:
 

@@ -43,8 +43,10 @@ class NMFResult:
     convgraph = None # an array of objective function values to plot convergence
     matrices = None # a python **list** of factorizing matrices
     objvalue = None # the final value of the objective function
+    converged = None
 
-    def __init__(self, matrices, convgraph=None, objvalue=None):
+    def __init__(self, matrices, convgraph=None, objvalue=None, converged=None):
         self.matrices = matrices
         self.convgraph = convgraph
         self.objvalue = objvalue
+        self.converged = converged

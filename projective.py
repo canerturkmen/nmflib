@@ -34,8 +34,10 @@ class ProjectiveNMF(BaseNMF):
 
         # VV^T calculated ahead of time
         VV = V * V.T
-        dist = 0
 
+        # flags and counters for checking convergence
+        dist = 0
+        converged = 0
         convgraph = np.zeros(self.maxiter / 10)
 
         for i in range(self.maxiter):
@@ -54,8 +56,9 @@ class ProjectiveNMF(BaseNMF):
                 convgraph[i/10] = dist
 
                 if pdist - dist < self.stopconv:
+                    converged = 1
                     break
 
                 pdist = dist
 
-        return NMFResult((W,), convgraph, dist)
+        return NMFResult((W,), convgraph, dist, converged)

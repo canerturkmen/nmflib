@@ -4,6 +4,8 @@ from basenmf import BaseNMF, NMFResult
 from scipy.spatial.distance import pdist, squareform
 import numpy as np
 from sklearn.neighbors import kneighbors_graph
+from scipy.sparse import issparse, csr_matrix, diags
+from .utils import trace as sparse_trace
 
 class NSpecClus(BaseNMF):
     """
@@ -15,7 +17,6 @@ class NSpecClus(BaseNMF):
 
     The class initializer DOES NOT take an affinity matrix, but rather takes the original data matrix, computes
     the affinity matrix via a Gaussian kernel, and performs clustering on that front.
-
     """
 
     def __init__(self, X, k, **kwargs):
@@ -28,65 +29,71 @@ class NSpecClus(BaseNMF):
         BaseNMF.__init__(self, X, k, **kwargs)
 
         _affinity = kwargs.get("affinity")
-        if _affinity:
-            if _affinity == "nn":
-                self._affinity = "nn"
-            elif _affinity == "gaussian":
-                # will compute the Gaussian kernel of euclidean distance
-                self._affinity = "gaussian"
-            else:
-                raise Exception("Unrecognized affinity parameter %s given" % _affinity)
-        else:
-            self._affinity = "nn"
-
-        # the gamma parameter for Gaussian kernel, default 1.
         self._gamma = kwargs.get("gamma") or .005
+        # Derive the affinity matrix
 
+        if _affinity == "nn" or _affinity is None:
+            # The affinity matrix is a sparse nearest neighbors graph {0,1}^(n x n)
+            self.A = kneighbors_graph(self.X, n_neighbors=20)
+        elif _affinity == "gaussian":
+            dist_matrix = squareform(pdist(self.X))
+            self.A = np.exp(-self._gamma * dist_matrix ** 2)
+        elif _affinity == "linear":
+            # Derive the pairwise linear kernel matrix
+            self.A = self.X * self.X.T
+        else:
+            raise ValueError("Unrecognized kernel given")
 
     def predict(self):
 
-        if self._affinity == "gaussian":
-            # first convert the data matrix to pairwise distances
-            dist_matrix = squareform(pdist(self.X))
-            # then compute the affinity matrix using Gaussian kernel of the Euclidean distance
-            self.V = np.exp(-self._gamma * dist_matrix ** 2)
-
-        else:
-            # calculate the K-NN graph of the matrix
-            self.V = kneighbors_graph(self.X, n_neighbors=20)
-
-        if self._affinity == "nn":
-            # TODO: must implement sparse version as well
-            self.V = self.V.todense()
-        else:
-            self.V = np.matrix(self.V)
-
-        m, n = self.V.shape
-        dd = np.array(self.V.sum(1))[:,0]
-        D = np.matrix(np.diag(dd))
-        H = np.matrix(np.random.rand(m, self.k))
+        m, n = self.A.shape # m observations
 
         convgraph = np.zeros(self.maxiter / 10)
-        distold = 0.
+        pdist = 0.
+        converged = False
 
-        for i in range(self.maxiter):
+        dd = np.array(self.A.sum(1))[:,0]
+        H = np.matrix(np.random.rand(m, self.k))
 
-            # multiplicative update step, Euclidean error reducing
-            alpha = H.T * self.V * H
+        # Run separately for sparse and dense versions
+        if issparse(self.A):
+            # We are working on a nearest neighbors graph
 
-            d1 = np.sqrt(np.divide(self.V*H, D*H*alpha))
-            H = np.multiply(H, d1)
+            D = diags(dd,0, format="csr")
+            H = csr_matrix(H)
 
-            # every 10 iterations, check convergence
-            if i % 10 == 0:
+            EPS = csr_matrix(np.ones(H.shape)*np.finfo(float).eps) # matrix of epsilons
 
-                dist = alpha.trace()
-                print dist
-                convgraph[i/10] = dist
+            for i in range(self.maxiter):
 
-                diff = dist - distold
-                print "diff is %s" % diff
+                AH = self.A*H # 486
 
-                distold = dist
+                alpha = H.T * AH # 272
 
-        return NMFResult((H,), convgraph, distold)
+                d1 = csr_matrix(np.sqrt(np.divide(AH + EPS, D*H*alpha + EPS)))
+                H = H.multiply(d1) #20ms
+
+                if i % 10 == 0:
+                    dist = sparse_trace(alpha)
+                    convgraph[i/10] = dist
+                    pdist = dist
+        else:
+            self.A = np.matrix(self.A)
+
+            D = np.matrix(np.diag(dd))
+
+            for i in range(self.maxiter):
+
+                # multiplicative update step, Euclidean error reducing
+                alpha = H.T * self.A * H
+
+                d1 = np.sqrt(np.divide(self.A*H, D*H*alpha))
+                H = np.multiply(H, d1)
+
+                # every 10 iterations, check convergence
+                if i % 10 == 0:
+                    dist = alpha.trace()
+                    convgraph[i/10] = dist
+                    pdist = dist
+
+        return NMFResult((H,), convgraph, pdist)
