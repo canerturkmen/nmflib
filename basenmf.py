@@ -6,7 +6,7 @@ class BaseNMF:
     """
 
     maxiter = 10000
-    stopconv = 40
+    stopconv = 1e-4
 
     def __init__(self, X, k, **kwargs):
         """
@@ -30,7 +30,7 @@ class BaseNMF:
             self.maxiter = kwargs.get("maxiter")
 
         if kwargs.get("stopconv"):
-            self.maxiter = kwargs.get("stopconv")
+            self.stopconv = kwargs.get("stopconv")
 
         self.X = X
         self.k = k
