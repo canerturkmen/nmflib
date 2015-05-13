@@ -1,5 +1,8 @@
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import LabelBinarizer
+from .utils import frobenius
+
+import numpy as np
 
 
 class ClusterNMF(BaseNMF):
@@ -7,7 +10,7 @@ class ClusterNMF(BaseNMF):
     An implementation of Cluster-NMF, introduced by Ding et al. in
 
     Chris Ding, Tao Li, and Michael I. Jordan. Convex and semi-nonnegative matrix factorizations.
-    Pattern Analysis and Machine Intelligence, IEEE Transactions on, 32(1):45–55, 2010
+    Pattern Analysis and Machine Intelligence, IEEE Transactions on
 
     ClusterNMF is theoretically similar to Projective NMF, except for the major difference of being able to
     work with negative data matrices as well.
@@ -27,6 +30,14 @@ class ClusterNMF(BaseNMF):
         # initialize the factorizing matrix
         G = H + .2 * np.ones(H.shape)
 
+        # we will work with the transpose of the matrix, X is now (n_features, n_obs)
+        X = np.mat(self.X.T)
+
+        # calculate X*X^T in advance (pairwise inner product matrix)
+        XTX = X.T * X
+        XTXp = (np.abs(XTX) + XTX) / 2
+        XTXn = (XTX - np.abs(XTX)) / 2
+
         # flags and counters for checking convergence
         dist = 0
         converged = 0
@@ -35,16 +46,17 @@ class ClusterNMF(BaseNMF):
         for i in range(self.maxiter):
 
             # multiplicative update step, Euclidean error reducing
-            # num = VV * W
-            # denom = (W * (W.T * VV * W)) + (VV * W * (W.T * W))
-            # W = np.multiply(W, np.divide(num, denom))
 
-            # normalize W
-            W /= np.linalg.norm(W,2)
+            factor = np.divide(XTXp*G + G*G.T*XTXn*G, XTXn*G + G*G.T*XTXp*G)
+
+            G = np.multiply(G, factor)
+
+            # normalize G
+            G /= np.linalg.norm(G,2)
 
             # every 10 iterations, check convergence
             if i % 10 == 0:
-                dist = frobenius(V, W*W.T*V)
+                dist = frobenius(X, X*G*G.T)
                 convgraph[i/10] = dist
 
                 if pdist - dist < self.stopconv:
@@ -53,4 +65,4 @@ class ClusterNMF(BaseNMF):
 
                 pdist = dist
 
-        return NMFResult((W,), convgraph, dist, converged)
+        return NMFResult((G,), convgraph, dist, converged)

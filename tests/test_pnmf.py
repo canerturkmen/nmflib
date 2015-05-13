@@ -1,5 +1,6 @@
 
 from ..projective import ProjectiveNMF
+from ..clusternmf import ClusterNMF
 import numpy as np
 
 
@@ -14,7 +15,9 @@ class TestPNMF:
         self.X = X
 
         self.pnmf = ProjectiveNMF(X, 5, stopconv=1e-4)
+        self.cvx = ClusterNMF(X, 5, stopconv=1e-4)
         self.res = self.pnmf.predict()
+        self.cvxres = self.cvx.predict()
 
 
     def test_pnmf_converge(self):
@@ -29,3 +32,9 @@ class TestPNMF:
         W = self.res.matrices[0]
 
         assert np.linalg.norm(self.X - W*W.T*self.X, 'fro') - self.res.objvalue < 1e-10
+
+    def test_cvxnmf_converge(self):
+        cg = self.cvxres.convgraph
+
+        print cg
+        assert not np.any((np.roll(cg, 1) - cg)[1:] < 0)

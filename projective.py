@@ -9,7 +9,7 @@ Created on Mon Oct 13 09:03:08 2014
 import sys
 import numpy as np
 from basenmf import BaseNMF, NMFResult
-from utils import frobenius
+from .utils import frobenius
 
 class ProjectiveNMF(BaseNMF):
     """
