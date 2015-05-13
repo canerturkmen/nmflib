@@ -1,8 +1,10 @@
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import LabelBinarizer
 from .utils import frobenius
+from .basenmf import BaseNMF, NMFResult
 
 import numpy as np
+import sys
 
 
 class ClusterNMF(BaseNMF):
@@ -22,7 +24,8 @@ class ClusterNMF(BaseNMF):
         """
 
         # Fresh start, as described in the paper
-        KMeans(n_clusters=self.k).fit_predict(X)
+        pdist = sys.maxint #very large number
+        cl = KMeans(n_clusters=self.k).fit_predict(self.X)
 
         H = np.mat(LabelBinarizer().fit_transform(cl)) # transform to cluster indicator matrix
         D_ = np.mat(np.diag(1 / H.sum(0).astype('float64'))) # D^-1
@@ -40,7 +43,7 @@ class ClusterNMF(BaseNMF):
 
         # flags and counters for checking convergence
         dist = 0
-        converged = 0
+        converged = False
         convgraph = np.zeros(self.maxiter / 10)
 
         for i in range(self.maxiter):
@@ -60,7 +63,7 @@ class ClusterNMF(BaseNMF):
                 convgraph[i/10] = dist
 
                 if pdist - dist < self.stopconv:
-                    converged = 1
+                    converged = True
                     break
 
                 pdist = dist

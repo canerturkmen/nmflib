@@ -12,6 +12,6 @@ Currently, the library includes initial implementations of:
 - Projective NMF (Yuan and Oja)
 - Nonnegative Spectral Clustering (Ding et al.)
 
-The code also includes some demos, contained in files `demo_*`, using the USPS handwritten digits, UCI repository Wine data set, and Lenna from scipy. 
+The code also includes some demos, contained in files `demo_*`, using the USPS handwritten digits, UCI repository Wine data set, and Lenna from scipy.
 
 For any questions you can always [email](mailto:turkmen.ac@gmail.com) me.
