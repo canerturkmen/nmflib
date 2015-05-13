@@ -23,6 +23,7 @@ class BaseNMF:
         :param k: number of dimensions for NMF
         """
 
+        #TODO: ClusterNMF can have negative entries!
         if X.min() < 0:
             raise Exception("The matrix cannot have negative entries")
 

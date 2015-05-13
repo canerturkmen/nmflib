@@ -27,7 +27,7 @@ class TestNSC:
         cg = self.res.convgraph
 
         print cg
-        assert not np.any((np.roll(cg, 1) - cg)[1:] < 0)
+        assert not np.any((np.roll(cg, 1) - cg)[3:] > 0)
 
 
     def test_nsc_converge_gauss(self):
@@ -40,7 +40,7 @@ class TestNSC:
         cg = self.res.convgraph
 
         print cg
-        assert not np.any((np.roll(cg, 1) - cg)[1:] < 0)
+        assert not np.any((np.roll(cg, 1) - cg)[3:] > 0)
 
 
     # def test_pnmf_objective(self):

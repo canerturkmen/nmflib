@@ -5,7 +5,7 @@ from scipy.spatial.distance import pdist, squareform
 import numpy as np
 from sklearn.neighbors import kneighbors_graph
 from scipy.sparse import issparse, csr_matrix, diags
-from .utils import trace as sparse_trace
+from .utils import trace as sparse_trace, norm as sparse_norm
 
 class NSpecClus(BaseNMF):
     """
@@ -75,6 +75,8 @@ class NSpecClus(BaseNMF):
                 d1 = csr_matrix(np.sqrt(np.divide(AH + EPS, D*H*alpha + EPS)))
                 H = H.multiply(d1) #20ms
 
+                H /= sparse_norm(H)
+
                 if i % 10 == 0:
                     dist = sparse_trace(alpha)
                     convgraph[i/10] = dist
@@ -92,6 +94,8 @@ class NSpecClus(BaseNMF):
 
                 d1 = np.sqrt(np.divide(self.A*H, D*H*alpha))
                 H = np.multiply(H, d1)
+
+                H /= np.linalg.norm(H,2)
 
                 # every 10 iterations, check convergence
                 if i % 10 == 0:
