@@ -16,16 +16,32 @@ class TestNSC:
 
         self.X = X
 
-        self.nsc = NSpecClus(X, 5, stopconv=1e-4)
+
+    def test_nsc_converge_nn(self):
+        # Test that the objective function is non-increasing
+
+
+        self.nsc = NSpecClus(self.X, 5, stopconv=1e-4)
         self.res = self.nsc.predict()
 
-
-    def test_nsc_converge(self):
-        # Test that the objective function is non-increasing
         cg = self.res.convgraph
 
         print cg
         assert not np.any((np.roll(cg, 1) - cg)[1:] < 0)
+
+
+    def test_nsc_converge_gauss(self):
+        # Test that the objective function is non-increasing
+
+
+        self.nsc = NSpecClus(self.X, 5, stopconv=1e-4, affinity="gaussian")
+        self.res = self.nsc.predict()
+
+        cg = self.res.convgraph
+
+        print cg
+        assert not np.any((np.roll(cg, 1) - cg)[1:] < 0)
+
 
     # def test_pnmf_objective(self):
     #     # Test that the objective function is calculated correctly

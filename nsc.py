@@ -25,11 +25,12 @@ class NSpecClus(BaseNMF):
         :param X: The data matrix, **must** be a data matrix of shape (n_samples, n_features)
         :param k: number of clusters
         :return:
+
         """
         BaseNMF.__init__(self, X, k, **kwargs)
 
         _affinity = kwargs.get("affinity")
-        self._gamma = kwargs.get("gamma") or .005
+        _gamma = kwargs.get("gamma") or .005
         # Derive the affinity matrix
 
         if _affinity == "nn" or _affinity is None:
@@ -37,9 +38,9 @@ class NSpecClus(BaseNMF):
             self.A = kneighbors_graph(self.X, n_neighbors=20)
         elif _affinity == "gaussian":
             dist_matrix = squareform(pdist(self.X))
-            self.A = np.exp(-self._gamma * dist_matrix ** 2)
+            self.A = np.exp(-_gamma * dist_matrix ** 2)
         elif _affinity == "linear":
-            # Derive the pairwise linear kernel matrix
+            # Derive the pairwise inner product kernel matrix
             self.A = self.X * self.X.T
         else:
             raise ValueError("Unrecognized kernel given")
@@ -52,13 +53,14 @@ class NSpecClus(BaseNMF):
         pdist = 0.
         converged = False
 
-        dd = np.array(self.A.sum(1))[:,0]
         H = np.matrix(np.random.rand(m, self.k))
 
+        # TODO: add normalization to the update steps!
         # Run separately for sparse and dense versions
         if issparse(self.A):
             # We are working on a nearest neighbors graph
 
+            dd = np.array(self.A.sum(1))[:,0]
             D = diags(dd,0, format="csr")
             H = csr_matrix(H)
 
@@ -80,6 +82,7 @@ class NSpecClus(BaseNMF):
         else:
             self.A = np.matrix(self.A)
 
+            dd = np.array(self.A.sum(1))[:,0]
             D = np.matrix(np.diag(dd))
 
             for i in range(self.maxiter):
