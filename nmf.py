@@ -1,5 +1,5 @@
 from basenmf import BaseNMF, NMFResult
-from metrics import frobenius, kldivergence
+from .utils import frobenius, kldivergence
 import sys
 import numpy as np
 #%%
