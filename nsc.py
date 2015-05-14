@@ -103,4 +103,7 @@ class NSpecClus(BaseNMF):
                     convgraph[i/10] = dist
                     pdist = dist
 
-        return NMFResult((H,), convgraph, pdist)
+        if issparse(H):
+            H = H.toarray()
+            
+        return NMFResult((np.array(H),), convgraph, pdist)

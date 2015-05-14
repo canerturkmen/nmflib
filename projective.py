@@ -61,4 +61,4 @@ class ProjectiveNMF(BaseNMF):
 
                 pdist = dist
 
-        return NMFResult((W,), convgraph, dist, converged)
+        return NMFResult((np.array(W),), convgraph, dist, converged)

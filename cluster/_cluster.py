@@ -78,4 +78,7 @@ class NMFClustering:
 
         result = nmf.predict()
 
+        W = result.matrices[0]
+        W /= np.linalg.norm(W, 2, 0)
+
         return np.argmax(result.matrices[0], 1), result

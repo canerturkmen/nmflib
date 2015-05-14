@@ -12,8 +12,6 @@ from nmflib.cluster import NMFClustering
 
 np.random.seed(0)
 
-# Generate datasets. We choose the size big enough to see the scalability
-# of the algorithms, but not too big to avoid too long running times
 n_samples = 1500
 
 dsets = ["circles", "moons", "blobs", "random"]
@@ -21,8 +19,7 @@ dsets = ["circles", "moons", "blobs", "random"]
 data = [
     datasets.make_circles(n_samples=n_samples, factor=.5, noise=.05)[0],
     datasets.make_moons(n_samples=n_samples, noise=.05)[0],
-    datasets.make_blobs(n_samples=n_samples, random_state=8)[0],
-    np.random.rand(n_samples, 2)
+    datasets.make_blobs(n_samples=n_samples, random_state=8)[0]
 ]
 
 
@@ -37,8 +34,8 @@ plt.show()
 
 # For each, run a K-means clustering with k=2 and plot
 
-km = cluster.KMeans(2, "cluster")
-nmf = NMFClustering(3)
+km = cluster.KMeans(2)
+nmf = NMFClustering(3, "spectral", {"affinity": "gaussian"})
 colors = np.array([x for x in 'bgrcmykbgrcmykbgrcmykbgrcmyk'])
 colors = np.hstack([colors] * 20)
 
@@ -47,9 +44,9 @@ for i, d in enumerate(data):
     # y = km.fit_predict(d)
 
     #project to nonnegative quadrant
-    d = .5 * (np.abs(d) + d)
+    # d = .5 * (np.abs(d) + d)
 
-    y, result = nmf.fit_predict(d)
+    y, result = nmf.fit_predict(d + 100)
 
     plots[i%2, i/2].set_title(dsets[i])
     plots[i%2, i/2].scatter(d[:,0], d[:,1], s=100, color=colors[y].tolist())
