@@ -2,6 +2,8 @@ Welcome to
 
 ## NMFLIB
 
+[![Build Status](https://travis-ci.org/canerturkmen/nmflib.svg?branch=master)](https://travis-ci.org/canerturkmen/nmflib)
+
 NMFLIB is the early version of a lightweight library including different implementations of Non-negative
 Matrix Factorization, and variants, built using **python**, numpy, scipy and some components from scikit learn.
 
