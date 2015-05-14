@@ -8,8 +8,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from sklearn import cluster, datasets
-from sklearn.neighbors import kneighbors_graph
-from sklearn.preprocessing import StandardScaler
 
 np.random.seed(0)
 
@@ -17,15 +15,36 @@ np.random.seed(0)
 # of the algorithms, but not too big to avoid too long running times
 n_samples = 1500
 
-datasets = ["noisy_circles", "noisy_moons", "blobs", "random"]
+dsets = ["circles", "moons", "blobs", "random"]
 
 data = [
-    datasets.make_circles(n_samples=n_samples, factor=.5, noise=.05),
-    datasets.make_moons(n_samples=n_samples, noise=.05),
-    datasets.make_blobs(n_samples=n_samples, random_state=8),
+    datasets.make_circles(n_samples=n_samples, factor=.5, noise=.05)[0],
+    datasets.make_moons(n_samples=n_samples, noise=.05)[0],
+    datasets.make_blobs(n_samples=n_samples, random_state=8)[0],
     np.random.rand(n_samples, 2)
 ]
 
 
+f, plots = plt.subplots(2,2)
+# First provide an overview of the data
 for i, d in enumerate(data):
-    pass
+
+    plots[i%2, i/2].set_title(dsets[i])
+    plots[i%2, i/2].scatter(d[:,0], d[:,1], s=100)
+
+plt.show()
+
+# For each, run a K-means clustering with k=2 and plot
+
+km = cluster.KMeans(2)
+colors = np.array([x for x in 'bgrcmykbgrcmykbgrcmykbgrcmyk'])
+colors = np.hstack([colors] * 20)
+
+f, plots = plt.subplots(2,2)
+for i, d in enumerate(data):
+    y = km.fit_predict(d)
+
+    plots[i%2, i/2].set_title(dsets[i])
+    plots[i%2, i/2].scatter(d[:,0], d[:,1], s=100, color=colors[y].tolist())
+
+plt.show()
