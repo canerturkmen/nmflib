@@ -9,5 +9,5 @@ X, y = iris["data"], iris["target"]
 def test_sparse_fails_bad_solver():
     try:
         SparseNMF(eta=5, beta=4, solver="badmedicine")
-    except e:
+    except Exception as e:
         assert type(e) == ValueError
