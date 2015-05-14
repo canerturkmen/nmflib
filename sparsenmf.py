@@ -16,12 +16,12 @@ class SparseNMF(BaseNMF):
         Initialize the Sparse-NMF class, an implementation of the cost function formulation given by
         Kim and Park.
 
-        ```
-        SparseNMF(X, k, eta=1, beta=1, solver="nnls")
-        ```
-
         .. math::
             \min_{W,H} \frac{1}{2} \left[ ||A - WH^T ||_F^2 + \eta ||W||_F^2 + \beta \sum_{j=1}^{n} ||H(j,:)||_1^2  \right] s.t. W,H > 0
+
+
+        Reference:
+        Jingu Kim and Haesun Park. Sparse Nonnegative Matrix Factorization for Clustering. 2008.
 
         :param X: The data matrix, **must** be a data matrix of shape (n_samples, n_features)
         :param k: number of clusters
@@ -32,8 +32,8 @@ class SparseNMF(BaseNMF):
         BaseNMF.__init__(self, X, k, **kwargs)
 
         # Initialize regularization parameters
-        self.eta = kwargs.get("eta") or 1
-        self.beta = kwargs.get("beta") or 1
+        self.eta = kwargs.get("eta") or .01
+        self.beta = kwargs.get("beta") or .01
 
         self.solver_param = kwargs.get("solver") or "nnls"
 
@@ -103,7 +103,7 @@ class SparseNMF(BaseNMF):
         Xaug = np.r_[self.X, np.zeros((1,H.shape[1]))]
 
         # 'augmented' left factorizing matrix with vector of ones
-        Waug = np.r_[W, np.sqrt(self.beta)*np.ones((1,5))]
+        Waug = np.r_[W, np.sqrt(self.beta)*np.ones((1,H.shape[0]))]
 
         Htaug = np.r_[H.T, np.sqrt(self.eta) * np.eye(H.shape[0])]
         Xaugkm = np.r_[self.X.T, np.zeros(W.T.shape)]
@@ -116,5 +116,5 @@ class SparseNMF(BaseNMF):
 
         return (W,H)
 
-    def _update_scipy_lstsq(W, H):
-        pass
+    def _update_scipy_lstsq(self,W, H):
+        raise NotImplementedError("Least squares solver not implemented. Sorry.")
