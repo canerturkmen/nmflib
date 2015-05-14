@@ -35,9 +35,9 @@ class NMFClustering:
 
         self.k = n_clusters
         self.nmf_class = None
-        self.kwargs = None # keyword arguments that will be passed to NMF constructor
+        self.kwargs = {} # keyword arguments that will be passed to NMF constructor
 
-        filter_dict = lambda x, ls : {k: x[k] for k in ls}
+        filter_dict = lambda x, ls : {k: x[k] for k in ls if x.get(k)}
 
         if algorithm == "nmf":
             # perform normal NMF
@@ -54,7 +54,7 @@ class NMFClustering:
             self.kwargs = filter_dict(options, ("affinity", "gamma"))
 
         elif algorithm == "projective":
-            self.nmf_class = NSpecClus
+            self.nmf_class = ProjectiveNMF
 
         elif algorithm == "cluster":
             self.nmf_class = ClusterNMF
@@ -64,7 +64,7 @@ class NMFClustering:
 
         self.kwargs.update({"maxiter": maxiter, "stopconv": stopconv})
 
-    def fit_predict(X):
+    def fit_predict(self, X):
         """
         Fit a clustering algorithm on the data provided in X. The data is expected
         to be of shape (n_features, n_samples).
@@ -76,6 +76,6 @@ class NMFClustering:
 
         nmf = self.nmf_class(X, self.k, **self.kwargs) # set up the algorithm
 
-        result = nmf.run()
+        result = nmf.predict()
 
-        return np.argmax(res.matrices[0], 1), result
+        return np.argmax(result.matrices[0], 1), result

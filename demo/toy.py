@@ -8,6 +8,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from sklearn import cluster, datasets
+from nmflib.cluster import NMFClustering
 
 np.random.seed(0)
 
@@ -36,13 +37,19 @@ plt.show()
 
 # For each, run a K-means clustering with k=2 and plot
 
-km = cluster.KMeans(2)
+km = cluster.KMeans(2, "cluster")
+nmf = NMFClustering(3)
 colors = np.array([x for x in 'bgrcmykbgrcmykbgrcmykbgrcmyk'])
 colors = np.hstack([colors] * 20)
 
 f, plots = plt.subplots(2,2)
 for i, d in enumerate(data):
-    y = km.fit_predict(d)
+    # y = km.fit_predict(d)
+
+    #project to nonnegative quadrant
+    d = .5 * (np.abs(d) + d)
+
+    y, result = nmf.fit_predict(d)
 
     plots[i%2, i/2].set_title(dsets[i])
     plots[i%2, i/2].scatter(d[:,0], d[:,1], s=100, color=colors[y].tolist())
