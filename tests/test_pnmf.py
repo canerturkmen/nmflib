@@ -31,7 +31,7 @@ class TestPNMF:
 
         W = self.res.matrices[0]
 
-        assert np.linalg.norm(self.X - W*W.T*self.X, 'fro') - self.res.objvalue < 1e-10
+        assert np.linalg.norm(self.X -  W.dot(W.T).dot(self.X), 'fro') - self.res.objvalue < 1e-10
 
     def test_cvxnmf_converge(self):
         cg = self.cvxres.convgraph

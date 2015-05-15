@@ -1,15 +1,12 @@
 
 from .nmf import BaseNMF, NMFResult
-from .utils import frobenius
+from .utils import frobenius, normalize_factor_matrices
 from scipy.optimize import nnls
 from scipy.sparse import issparse
 import numpy as np
 
 class SparseNMF(BaseNMF):
-    """
-
-
-    """
+    #TODO: Not performing when k > m
 
     def __init__(self, X, k, **kwargs):
         """
@@ -79,10 +76,8 @@ class SparseNMF(BaseNMF):
                 pdist = dist
 
         # normalize W,H before returning
-        norms = np.linalg.norm(W, 2, axis=0)
-        norm_gt_0 = norms > 0
-        W[:, norm_gt_0] /= norms[norm_gt_0]
-        H[norm_gt_0, :] = ((H[norm_gt_0, :].T) * norms[norm_gt_0]).T
+
+        W, H = normalize_factor_matrices(W, H)
 
         return NMFResult((W,H), convgraph, dist, converged)
 

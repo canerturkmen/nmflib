@@ -18,8 +18,8 @@ dsets = ["circles", "moons", "blobs", "random"]
 
 data = [
     datasets.make_circles(n_samples=n_samples, factor=.5, noise=.05)[0],
-    datasets.make_moons(n_samples=n_samples, noise=.05)[0],
-    datasets.make_blobs(n_samples=n_samples, random_state=8)[0]
+    datasets.make_moons(n_samples=n_samples, noise=.05)[0]#,
+    # datasets.make_blobs(n_samples=n_samples, random_state=8)[0]
 ]
 
 
@@ -35,7 +35,8 @@ plt.show()
 # For each, run a K-means clustering with k=2 and plot
 
 km = cluster.KMeans(2)
-nmf = NMFClustering(3, "spectral", {"affinity": "gaussian"})
+# nmf = NMFClustering(3, "spectral", {"affinity": "gaussian"})
+nmf = NMFClustering(3, "nmf")
 colors = np.array([x for x in 'bgrcmykbgrcmykbgrcmykbgrcmyk'])
 colors = np.hstack([colors] * 20)
 

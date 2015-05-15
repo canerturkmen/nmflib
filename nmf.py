@@ -1,5 +1,5 @@
 from basenmf import BaseNMF, NMFResult
-from .utils import frobenius, kldivergence
+from .utils import frobenius, kldivergence, normalize_factor_matrices
 import sys
 import numpy as np
 #%%
@@ -29,30 +29,18 @@ class NMF(BaseNMF):
         H = np.random.rand(self.k, n)
         convgraph = np.zeros(self.maxiter / 10)
 
-        for i in range(self.maxiter):
-            if self.objective == "eu":
-                # multiplicative update steps, Euclidean error reducing
-                H = H * ((np.dot(W.T,V)/np.dot(np.dot(W.T, W), H )))
-                W = W * ((np.dot(V, H.T)/np.dot(np.dot(W, H), H.T )))
+        eps = 1e-9 # small number for stability
 
-            elif self.objective == "kl":
-                # multiplicative update steps for KL Divergence
-                H = H * (np.dot(W.T, (V / np.dot(W, H)))) /np.tile(np.sum(W,0), (n,1)).T
-                W = W * (np.dot((V / np.dot(W, H)), H.T)) /np.tile(np.sum(H,1), (m,1))
+        for i in range(self.maxiter):
+            # multiplicative update steps, Euclidean error reducing
+            H = H * ( W.T.dot(V) + eps / W.T.dot(W).dot(H) + eps  )
+            W = W * ( V.dot(H.T) + eps / W.dot(H.dot(H.T)) + eps  )
 
             # every 10 iterations, check convergence
             if i % 10 == 0:
-                if self.objective == "eu":
-                    dist = frobenius(V, np.dot(W,H))
-
-                elif self.objective == "kl":
-                    dist = kldivergence(V, np.dot(W,H))
-
+                dist = frobenius(V, W.dot(H))
                 convgraph[i/10] = dist
-                # print dist
-                #if distold - dist < self.stopconv:
-                #    print "Converged"
-                #    break
-                #distold = dist
+
+        W, H = normalize_factor_matrices(W,H)
 
         return NMFResult((W, H), convgraph, dist)
