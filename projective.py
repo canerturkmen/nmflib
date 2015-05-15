@@ -44,10 +44,15 @@ class ProjectiveNMF(BaseNMF):
             # multiplicative update step, Euclidean error reducing
             num = VV * W
             denom = (W * (W.T * VV * W)) + (VV * W * (W.T * W))
-            W = np.multiply(W, np.divide(num, denom))
+            # W = np.multiply(W, np.divide(num, denom))
 
-            # normalize W
-            W /= np.linalg.norm(W,2)
+            W = np.divide(np.multiply(W, num), denom)
+
+            # W = W .* (XX*W) ./ (W*(W'*XX*W) + XX*W*(W'*W));
+            # W = W ./ norm(W);
+
+            # normalize W TODO: check if L2 norm working similar to MATLAB
+            W /= np.linalg.norm(W, 2)
 
             # every 10 iterations, check convergence
             if i % 10 == 0:

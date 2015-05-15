@@ -1,4 +1,3 @@
-
 from .nmf import BaseNMF, NMFResult
 from .utils import frobenius, normalize_factor_matrices
 from scipy.optimize import nnls

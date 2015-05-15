@@ -54,3 +54,25 @@ def normalize_factor_matrices(W, H):
     H[norm_gt_0, :] = ((H[norm_gt_0, :].T) * norms[norm_gt_0]).T
 
     return (W,H)
+
+def normalize_matrix_columns(W):
+    """
+    Normalize a matrix columns to unit norm
+
+    :param W: matrix to be normalized
+    :type W: numpy.array
+    :returns: normalized matrix
+    """
+
+    # TODO: Zero columns!!
+    return W / np.linalg.norm(W, 2, 0)
+
+def matrix_approx_equal(W, H):
+    """
+    If two matrices are approximately equal, return True, else False. Utility function
+    required in tests.
+    """
+    if W.shape == H.shape:
+        return np.linalg.norm(W - H, 'fro') < 1e-4
+    else:
+        raise ValueError("Matrix dimensions must match")
