@@ -36,7 +36,7 @@ plt.show()
 
 km = cluster.KMeans(2)
 # nmf = NMFClustering(3, "spectral", {"affinity": "gaussian"})
-nmf = NMFClustering(2, "nmf")
+nmf = NMFClustering(2, "projective")
 colors = np.array([x for x in 'bgrcmykbgrcmykbgrcmykbgrcmyk'])
 colors = np.hstack([colors] * 20)
 

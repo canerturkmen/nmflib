@@ -6,7 +6,6 @@ Created on Mon Oct 13 09:03:08 2014
 """
 
 #from metrics import NMF, frobenius
-import sys
 import numpy as np
 from basenmf import BaseNMF, NMFResult
 from .utils import frobenius
@@ -26,7 +25,7 @@ class ProjectiveNMF(BaseNMF):
         """
 
         m, n = self.X.shape
-        pdist = sys.maxint #very large number
+        pdist = 1e9 #very large number
 
         # convert ndarrays to matrices for cleaner code
         V = np.matrix(self.X)
