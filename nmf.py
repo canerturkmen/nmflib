@@ -1,6 +1,5 @@
 from basenmf import BaseNMF, NMFResult
 from .utils import frobenius, kldivergence, normalize_factor_matrices
-import sys
 import numpy as np
 #%%
 class NMF(BaseNMF):
@@ -23,13 +22,14 @@ class NMF(BaseNMF):
 
         m, n = self.X.shape
         V = self.X
-        distold = sys.maxint #very large number
+        pdist = 1e9 #very large number
 
         W = np.random.rand(m, self.k)
         H = np.random.rand(self.k, n)
         convgraph = np.zeros(self.maxiter / 10)
+        converged = False
 
-        eps = 1e-9 # small number for stability
+        eps = 1e-7 # small number for stability
 
         for i in range(self.maxiter):
             # multiplicative update steps, Euclidean error reducing
@@ -40,6 +40,12 @@ class NMF(BaseNMF):
             if i % 10 == 0:
                 dist = frobenius(V, W.dot(H))
                 convgraph[i/10] = dist
+
+                if pdist - dist < self.stopconv:
+                    converged = True
+                    break
+
+                pdist = dist
 
         W, H = normalize_factor_matrices(W,H)
 

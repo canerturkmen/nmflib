@@ -37,7 +37,7 @@ class ProjectiveNMF(BaseNMF):
 
         # flags and counters for checking convergence
         dist = 0
-        converged = 0
+        converged = False
         convgraph = np.zeros(self.maxiter / 10)
 
         for i in range(self.maxiter):
@@ -56,7 +56,7 @@ class ProjectiveNMF(BaseNMF):
                 convgraph[i/10] = dist
 
                 if pdist - dist < self.stopconv:
-                    converged = 1
+                    converged = True
                     break
 
                 pdist = dist
