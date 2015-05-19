@@ -17,9 +17,9 @@ n_samples = 1500
 dsets = ["circles", "moons", "blobs", "random"]
 
 data = [
-    datasets.make_circles(n_samples=n_samples, factor=.5, noise=.05)[0]
-    #datasets.make_moons(n_samples=n_samples, noise=.05)[0]
-    # datasets.make_blobs(n_samples=n_samples, random_state=8)[0]
+    datasets.make_circles(n_samples=n_samples, factor=.5, noise=.05)[0],
+    datasets.make_moons(n_samples=n_samples, noise=.05)[0],
+    datasets.make_blobs(n_samples=n_samples, random_state=8)[0]
 ]
 
 
@@ -36,7 +36,7 @@ plt.show()
 
 km = cluster.KMeans(2)
 # nmf = NMFClustering(3, "spectral", {"affinity": "gaussian"})
-nmf = NMFClustering(2, "nmf", {}, 10000, 1e-11)
+nmf = NMFClustering(3, "nmf", {}, 100000, 1e-15)
 colors = np.array([x for x in 'bgrcmykbgrcmykbgrcmykbgrcmyk'])
 colors = np.hstack([colors] * 20)
 

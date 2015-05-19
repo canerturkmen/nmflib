@@ -25,15 +25,24 @@ class NMF(BaseNMF):
 
         for i in range(self.maxiter):
             # multiplicative update steps, Euclidean error reducing
-            H = H * ( W.T.dot(V) + eps / W.T.dot(W).dot(H) + eps  )
-            W = W * ( V.dot(H.T) + eps / W.dot(H.dot(H.T)) + eps  )
+            H = H * ( W.T.dot(V) / W.T.dot(W).dot(H)  )
+            H = (H.T / np.linalg.norm(H, 2, 1)).T
+
+            W = W * ( V.dot(H.T) / W.dot(H.dot(H.T)) )
+            W /= np.linalg.norm(W, 2, 0)
+            # normalize columns of H and W
+
+
+
 
             # every 10 iterations, check convergence
-            if i % 10 == 0:
+            if i % 100 == 0:
                 dist = frobenius(V, W.dot(H))
                 convgraph[i/10] = dist
 
-                if pdist - dist < self.stopconv:
+                print dist
+
+                if pdist - dist < self.stopconv and pdist - dist > self.stopconv:
                     converged = True
                     break
 
