@@ -7,14 +7,6 @@ class NMF(BaseNMF):
     Implementation of basic NMF (Lee and Seung) algorithm with Euclidean and KL-divergence objective functions
     """
 
-    objective = "eu" # objective function to optimize on
-
-    def __init__(self, X, k, **kwargs):
-        BaseNMF.__init__(self, X, k, **kwargs)
-
-        if kwargs.get("metric"):
-            self.objective = kwargs.get("metric")
-
     def predict(self):
         """
         Euclidean distance reducing update rules for NMF, presented in Lee and Seung (2001)
