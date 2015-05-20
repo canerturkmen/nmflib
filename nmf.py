@@ -32,15 +32,12 @@ class NMF(BaseNMF):
             W /= np.linalg.norm(W, 2, 0)
             # normalize columns of H and W
 
-
-
-
             # every 10 iterations, check convergence
             if i % 100 == 0:
                 dist = frobenius(V, W.dot(H))
                 convgraph[i/10] = dist
 
-                print dist
+                # print dist
 
                 if pdist - dist < self.stopconv and pdist - dist > self.stopconv:
                     converged = True

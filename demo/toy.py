@@ -28,28 +28,30 @@ f, plots = plt.subplots(2,2)
 for i, d in enumerate(data):
 
     plots[i%2, i/2].set_title(dsets[i])
-    plots[i%2, i/2].scatter(d[:,0], d[:,1], s=100)
+    plots[i%2, i/2].scatter(d[:,0], d[:,1], marker=".")
 
 plt.show()
 
 # For each, run a K-means clustering with k=2 and plot
 
 km = cluster.KMeans(2)
-# nmf = NMFClustering(3, "spectral", {"affinity": "gaussian"})
-nmf = NMFClustering(3, "nmf", {}, 100000, 1e-15)
+nmf = NMFClustering(2, "nmf", {}, 50000, 1e-10)
+# nmf = NMFClustering(2, "spectral", {"affinity": "hybrid", "nn": 15, "gamma":20}, 80000, 1e-12)
 colors = np.array([x for x in 'bgrcmykbgrcmykbgrcmykbgrcmyk'])
 colors = np.hstack([colors] * 20)
 
 f, plots = plt.subplots(2,2)
-for i, d in enumerate(data):
+for i, d0 in enumerate(data):
     # y = km.fit_predict(d)
 
     #project to nonnegative quadrant
     # d = .5 * (np.abs(d) + d)
+    np.random.shuffle(d0)
+    d = d0[:300,:]
 
     y, result = nmf.fit_predict(d + 15)
 
     plots[i%2, i/2].set_title(dsets[i])
-    plots[i%2, i/2].scatter(d[:,0], d[:,1], s=100, color=colors[y].tolist())
+    plots[i%2, i/2].scatter(d[:,0], d[:,1], marker=".", color=colors[y].tolist())
 
 plt.show()

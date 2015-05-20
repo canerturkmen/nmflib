@@ -30,12 +30,19 @@ class NSpecClus(BaseNMF):
         BaseNMF.__init__(self, X, k, **kwargs)
 
         _affinity = kwargs.get("affinity")
-        _gamma = kwargs.get("gamma") or .005
+        _gamma = kwargs.get("gamma") or 1.
+        _nn = kwargs.get("nn") or 10
         # Derive the affinity matrix
 
-        if _affinity == "nn" or _affinity is None:
+        if _affinity == "hybrid":
+            # the K-NN matrix weighted by Gaussian affinity
+            knng = kneighbors_graph(self.X, n_neighbors=_nn)
+            dist_matrix = squareform(pdist(self.X))
+            affinity = csr_matrix(np.exp(-_gamma * dist_matrix ** 2))
+            self.A = affinity.multiply(knng)
+        elif _affinity == "nn" or _affinity is None:
             # The affinity matrix is a sparse nearest neighbors graph {0,1}^(n x n)
-            self.A = kneighbors_graph(self.X, n_neighbors=20)
+            self.A = kneighbors_graph(self.X, n_neighbors=_nn)
         elif _affinity == "gaussian":
             dist_matrix = squareform(pdist(self.X))
             self.A = np.exp(-_gamma * dist_matrix ** 2)
@@ -105,5 +112,5 @@ class NSpecClus(BaseNMF):
 
         if issparse(H):
             H = H.toarray()
-            
+
         return NMFResult((np.array(H),), convgraph, pdist)

@@ -50,7 +50,7 @@ class NMFClustering:
 
         elif algorithm == "spectral":
             self.nmf_class = NSpecClus
-            self.kwargs = filter_dict(options, ("affinity", "gamma"))
+            self.kwargs = filter_dict(options, ("affinity", "gamma", "nn"))
 
         elif algorithm == "projective":
             self.nmf_class = ProjectiveNMF
