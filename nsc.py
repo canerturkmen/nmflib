@@ -4,8 +4,11 @@ from basenmf import BaseNMF, NMFResult
 from scipy.spatial.distance import pdist, squareform
 import numpy as np
 from sklearn.neighbors import kneighbors_graph
+from sklearn.cluster import KMeans
 from scipy.sparse import issparse, csr_matrix, diags
-from .utils import trace as sparse_trace, norm as sparse_norm
+from scipy.sparse.linalg import eigs
+from .utils import trace as sptrace, norm as sparse_norm
+# import pdb
 
 class NSpecClus(BaseNMF):
     """
@@ -29,26 +32,32 @@ class NSpecClus(BaseNMF):
         """
         BaseNMF.__init__(self, X, k, **kwargs)
 
-        _affinity = kwargs.get("affinity")
+        _affinity = kwargs.get("affinity") or "nn"
         _gamma = kwargs.get("gamma") or 1.
         _nn = kwargs.get("nn") or 10
+
+        self._embedding = kwargs.get("embedding") or True
         # Derive the affinity matrix
 
         if _affinity == "hybrid":
             # the K-NN matrix weighted by Gaussian affinity
             knng = kneighbors_graph(self.X, n_neighbors=_nn)
-            dist_matrix = squareform(pdist(self.X))
-            affinity = csr_matrix(np.exp(-_gamma * dist_matrix ** 2))
+            dist_matrix = squareform(pdist(X, "sqeuclidean"))
+            affinity = csr_matrix(np.exp(-_gamma * dist_matrix))
             self.A = affinity.multiply(knng)
-        elif _affinity == "nn" or _affinity is None:
+
+        elif _affinity == "nn":
             # The affinity matrix is a sparse nearest neighbors graph {0,1}^(n x n)
             self.A = kneighbors_graph(self.X, n_neighbors=_nn)
+
         elif _affinity == "gaussian":
-            dist_matrix = squareform(pdist(self.X))
-            self.A = np.exp(-_gamma * dist_matrix ** 2)
+            dist_matrix = squareform(pdist(X, "sqeuclidean"))
+            self.A = csr_matrix(np.exp(-_gamma * dist_matrix))
+
         elif _affinity == "linear":
             # Derive the pairwise inner product kernel matrix
             self.A = self.X * self.X.T
+
         else:
             raise ValueError("Unrecognized kernel given")
 
@@ -56,61 +65,59 @@ class NSpecClus(BaseNMF):
 
         m, n = self.A.shape # m observations
 
-        convgraph = np.zeros(self.maxiter / 10)
-        pdist = 0.
+        convgraph = np.zeros(self.maxiter / 25)
+        prevdist = 0.
         converged = False
 
-        H = np.matrix(np.random.rand(m, self.k))
+        eps = 1e-6
 
-        # TODO: add normalization to the update steps!
+        dd = np.array(self.A.sum(1))[:,0]
+        D = diags(dd,0, format="csr")
+
+        m, n = self.A.shape
+
+
+        # random initialization, will initialize with K-means if told to
+        H = csr_matrix(np.random.rand(m, self.k))
+
+        EPS = csr_matrix(np.ones(H.shape) * eps)
+
+        if self._embedding:
+            # Apply eigenspace embedding K-means for initialization (Ng Weiss Jordan)
+
+            Dz = diags(1 / (np.sqrt(dd) + eps), 0, format="csr")
+            DAD = Dz.dot(self.A).dot(Dz)
+
+            V = eigs(DAD, self.k)[1].real
+            km_data = V / (np.linalg.norm(V, 2, axis=1).T * np.ones((self.k,1))).T
+
+            km_predict = KMeans(n_clusters=self.k).fit_predict(km_data)
+
+            indices = km_predict
+            indptr = range(len(indices)+1)
+            data = np.ones(len(indices))
+            H = csr_matrix((data, indices, indptr))
+
         # Run separately for sparse and dense versions
-        if issparse(self.A):
-            # We are working on a nearest neighbors graph
 
-            dd = np.array(self.A.sum(1))[:,0]
-            D = diags(dd,0, format="csr")
-            H = csr_matrix(H)
+        for i in range(self.maxiter):
 
-            EPS = csr_matrix(np.ones(H.shape)*np.finfo(float).eps) # matrix of epsilons
+            AH = self.A.dot(H)
+            alpha = H.T.dot(AH)
 
-            for i in range(self.maxiter):
+            M1 = AH + EPS
+            M2 = D.dot(H).dot(alpha) + EPS
 
-                AH = self.A*H # 486
+            np.reciprocal(M2.data, out=M2.data)
+            d1 = M1.multiply(M2).sqrt()
 
-                alpha = H.T * AH # 272
+            H = H.multiply(d1)
 
-                d1 = csr_matrix(np.sqrt(np.divide(AH + EPS, D*H*alpha + EPS)))
-                H = H.multiply(d1) #20ms
+            if i % 25 == 0:
+                dist = sptrace(alpha)
+                convgraph[i/25] = dist
 
-                H /= sparse_norm(H)
+                diff = dist / prevdist - 1
+                prevdist = dist
 
-                if i % 10 == 0:
-                    dist = sparse_trace(alpha)
-                    convgraph[i/10] = dist
-                    pdist = dist
-        else:
-            self.A = np.matrix(self.A)
-
-            dd = np.array(self.A.sum(1))[:,0]
-            D = np.matrix(np.diag(dd))
-
-            for i in range(self.maxiter):
-
-                # multiplicative update step, Euclidean error reducing
-                alpha = H.T * self.A * H
-
-                d1 = np.sqrt(np.divide(self.A*H, D*H*alpha))
-                H = np.multiply(H, d1)
-
-                H /= np.linalg.norm(H,2)
-
-                # every 10 iterations, check convergence
-                if i % 10 == 0:
-                    dist = alpha.trace()
-                    convgraph[i/10] = dist
-                    pdist = dist
-
-        if issparse(H):
-            H = H.toarray()
-
-        return NMFResult((np.array(H),), convgraph, pdist)
+        return NMFResult((H.toarray(),), convgraph, pdist)
