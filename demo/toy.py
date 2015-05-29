@@ -36,8 +36,8 @@ plt.show()
 # For each, run a K-means clustering with k=2 and plot
 
 km = cluster.KMeans(2)
-nmf = NMFClustering(2, "spectral", {"affinity": "nn", "nn":30}, 300, 1e-10)
-# nmf = NMFClustering(2, "spectral", {"affinity": "hybrid", "nn": 15, "gamma":20}, 80000, 1e-12)
+# nmf = NMFClustering(2, "spectral", {"affinity": "nn", "nn":30}, 300, 1e-10)
+nmf = NMFClustering(2, "cluster", {}, 300, 1e-10)
 colors = np.array([x for x in 'bgrcmykbgrcmykbgrcmykbgrcmyk'])
 colors = np.hstack([colors] * 20)
 

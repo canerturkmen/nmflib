@@ -2,9 +2,9 @@ from sklearn.cluster import KMeans
 from sklearn.preprocessing import LabelBinarizer
 from .utils import frobenius
 from .basenmf import BaseNMF, NMFResult
+from scipy.sparse import csr_matrix
 
 import numpy as np
-import sys
 
 
 class ClusterNMF(BaseNMF):
@@ -24,14 +24,19 @@ class ClusterNMF(BaseNMF):
         """
 
         # Fresh start, as described in the paper
-        pdist = sys.maxint #very large number
+        pdist = 1e9 #very large number
         cl = KMeans(n_clusters=self.k).fit_predict(self.X)
 
-        H = np.mat(LabelBinarizer().fit_transform(cl)) # transform to cluster indicator matrix
+        # initialize H
+        indices = cl
+        indptr = range(len(indices)+1)
+        data = np.ones(len(indices))
+        H = csr_matrix((data, indices, indptr)).todense()
+
         D_ = np.mat(np.diag(1 / H.sum(0).astype('float64'))) # D^-1
 
         # initialize the factorizing matrix
-        G = H + .2 * np.ones(H.shape)
+        G = H + .2
 
         # we will work with the transpose of the matrix, X is now (n_features, n_obs)
         X = np.mat(self.X.T)
@@ -54,9 +59,6 @@ class ClusterNMF(BaseNMF):
 
             G = np.multiply(G, factor)
 
-            # normalize G
-            G /= np.linalg.norm(G,2)
-
             # every 10 iterations, check convergence
             if i % 10 == 0:
                 dist = frobenius(X, X*G*G.T)
@@ -68,4 +70,4 @@ class ClusterNMF(BaseNMF):
 
                 pdist = dist
 
-        return NMFResult((G,), convgraph, dist, converged)
+        return NMFResult((np.array(G),), convgraph, dist, converged)
