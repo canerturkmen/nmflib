@@ -7,7 +7,7 @@ IPython script to create and test clustering algorithms on toy data sets
 import numpy as np
 import matplotlib.pyplot as plt
 
-from sklearn import cluster, datasets
+from sklearn import cluster, datasets, mixture
 from nmflib.cluster import NMFClustering
 
 np.random.seed(0)
@@ -20,20 +20,22 @@ data = [
     datasets.make_circles(n_samples=n_samples, factor=.5, noise=.05)[0],
     datasets.make_moons(n_samples=n_samples, noise=.05)[0],
     datasets.make_blobs(n_samples=n_samples, random_state=8)[0],
-    #np.random.rand(n_samples, 2)
+    np.random.rand(n_samples, 2)
 ]
 
 
-f, plots = plt.subplots(2,2, facecolor="w")
-# First provide an overview of the data
-for i, d in enumerate(data):
 
-    plots[i%2, i/2].set_title(dsets[i])
-    plots[i%2, i/2].scatter(d[:,0], d[:,1], marker=".")
-
-plt.show()
 
 # For each, run a K-means clustering with k=2 and plot
+
+for i, d in enumerate(data):
+
+    d = d + np.abs(d.min())
+
+    y_km = cluster.KMeans(2).fit_predict(d)
+    y_gmm = mixture.GMM(2).fit_predict(d)
+    y_spec = cluster.SpectralClustering(2).fit_predict(d)
+
 
 km = cluster.KMeans(2)
 # nmf = NMFClustering(2, "spectral", {"affinity": "nn", "nn":30}, 300, 1e-10)
