@@ -25,10 +25,10 @@ class NMF(BaseNMF):
 
         for i in range(self.maxiter):
             # multiplicative update steps, Euclidean error reducing
-            H = H * ( W.T.dot(V) / W.T.dot(W).dot(H)  )
+            H = H * (( W.T.dot(V) + eps) / (W.T.dot(W).dot(H) + eps))
             H = (H.T / np.linalg.norm(H, 2, 1)).T
 
-            W = W * ( V.dot(H.T) / W.dot(H.dot(H.T)) )
+            W = W * ( (V.dot(H.T) + eps) / (W.dot(H.dot(H.T)) + eps) )
             W /= np.linalg.norm(W, 2, 0)
             # normalize columns of H and W
 
