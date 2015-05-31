@@ -4,18 +4,19 @@ interface
 """
 
 from sklearn import datasets
+import numpy as np
+import os
 
 def load_wine():
     """
     Load the Wine data set from UCI repository
     """
-    pass
 
-def load_usps():
-    """
-    Load the USPS handwritten digits data set
-    """
-    pass
+    data = np.genfromtxt(os.path.dirname(__file__) + "/data/wine.data", delimiter=",")
+    y = data[:,0].astype('int')
+    X = data[:,1:]
+
+    return {"data": X, "target": y}
 
 def load_digits():
     """
